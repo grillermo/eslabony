@@ -4,6 +4,7 @@ import { Link } from '@/lib/types';
 import { LinkItem } from './link-item';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useState, useEffect } from 'react';
+import { read } from 'fs';
 
 export function LinkList({ links: initialLinks }: { links: Link[] }) {
     const router = useRouter();
@@ -25,6 +26,9 @@ export function LinkList({ links: initialLinks }: { links: Link[] }) {
         return link.read === 0;
     });
 
+    const readLinksCount = links.filter(link => link.read === 1).length;
+    const unreadLinksCount = links.filter(link => link.read === 0).length;
+
     const setFilter = (newFilter: 'read' | 'unread') => {
         const params = new URLSearchParams(searchParams);
         if (newFilter === 'unread') {
@@ -42,21 +46,21 @@ export function LinkList({ links: initialLinks }: { links: Link[] }) {
             <div className="flex p-1 bg-gray-100 rounded-lg mb-6 sticky top-2 z-10 shadow-sm backdrop-blur-sm bg-opacity-90">
                 <button
                     onClick={() => setFilter('unread')}
-                    className={`flex-1 py-2 text-sm font-medium rounded-md transition-all ${filter === 'unread'
+                    className={`flex-1 py-2 text-sm font-medium rounded-md transition-all hover:cursor-pointer ${filter === 'unread'
                         ? 'bg-white text-gray-900 shadow-sm'
                         : 'text-gray-500 hover:text-gray-700'
                         }`}
                 >
-                    Unread
+                    Unread {unreadLinksCount}
                 </button>
                 <button
                     onClick={() => setFilter('read')}
-                    className={`flex-1 py-2 text-sm font-medium rounded-md transition-all ${filter === 'read'
+                    className={`flex-1 py-2 text-sm font-medium rounded-md transition-all hover:cursor-pointer ${filter === 'read'
                         ? 'bg-white text-gray-900 shadow-sm'
                         : 'text-gray-500 hover:text-gray-700'
                         }`}
                 >
-                    Read
+                    Read {readLinksCount}
                 </button>
             </div>
 
