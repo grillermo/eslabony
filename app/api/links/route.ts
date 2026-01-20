@@ -10,6 +10,7 @@ function isAuthenticated(req: NextRequest) {
 }
 
 export async function GET(req: NextRequest) {
+    console.log(`[${new Date().toISOString()}] GET /api/links`);
     try {
         const stmt = db.prepare('SELECT * FROM links ORDER BY timestamp DESC');
         const links = stmt.all();
@@ -52,12 +53,14 @@ async function getTitle(url: string): Promise<string | null> {
 }
 
 export async function POST(req: NextRequest) {
+    console.log(`[${new Date().toISOString()}] POST /api/links`);
     if (!isAuthenticated(req)) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     try {
         const body = await req.json();
+        console.log(`[${new Date().toISOString()}] POST Payload:`, JSON.stringify(body, null, 2));
         const { link } = body;
         let { note } = body;
 
@@ -84,6 +87,7 @@ export async function POST(req: NextRequest) {
 }
 
 export async function PATCH(req: NextRequest) {
+    console.log(`[${new Date().toISOString()}] PATCH /api/links`);
     // Assuming basic auth for patch as well, or maybe public if simpler? 
     // User said "PATCH link: allows you to update the read property".
     // I'll stick to requiring auth for consistency, but if the UI is client-side public, this might be an issue.
