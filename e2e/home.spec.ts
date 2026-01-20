@@ -22,7 +22,7 @@ test.describe('Home Page', () => {
         // Create a link via API request attached to the page context
         await page.request.post('/api/links', {
             headers: {
-                'Authorization': 'SECRET_TOKEN_123'
+                'Authorization': '44p9Wq6iJRxp4DE2vp4b3Yw6KWhRjcNohjDetwwRNy4K7cyUcxdwuWTUxVZUJkhWVjU'
             },
             data: {
                 link: newLinkUrl,

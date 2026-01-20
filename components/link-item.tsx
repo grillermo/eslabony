@@ -4,8 +4,7 @@ import { Link } from '@/lib/types';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 
-// Hardcoded auth token for client-side demo as per plan
-const AUTH_TOKEN = 'SECRET_TOKEN_123';
+const AUTH_TOKEN = '44p9Wq6iJRxp4DE2vp4b3Yw6KWhRjcNohjDetwwRNy4K7cyUcxdwuWTUxVZUJkhWVjU';
 
 export function LinkItem({ link }: { link: Link }) {
     const router = useRouter();

@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import db from '@/lib/db';
 import crypto from 'crypto';
 
-const AUTH_TOKEN = 'SECRET_TOKEN_123';
+const AUTH_TOKEN = process.env.AUTH_TOKEN;
 
 function isAuthenticated(req: NextRequest) {
     const token = req.headers.get('authorization');
