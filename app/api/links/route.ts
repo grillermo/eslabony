@@ -20,6 +20,37 @@ export async function GET(req: NextRequest) {
     }
 }
 
+async function getTitle(url: string): Promise<string | null> {
+    try {
+        const response = await fetch(url, {
+            headers: {
+                'User-Agent': 'Mozilla/5.0 (compatible; LinkSaver/1.0)',
+            },
+            signal: AbortSignal.timeout(5000), // 5 second timeout
+        });
+
+        if (!response.ok) return null;
+
+        const html = await response.text();
+        const match = html.match(/<title[^>]*>([\s\S]*?)<\/title>/i);
+
+        if (match && match[1]) {
+            // Basic HTML entity decoding for common ones
+            return match[1]
+                .replace(/&amp;/g, '&')
+                .replace(/&lt;/g, '<')
+                .replace(/&gt;/g, '>')
+                .replace(/&quot;/g, '"')
+                .replace(/&#039;/g, "'")
+                .trim();
+        }
+        return null;
+    } catch (error) {
+        console.error('Error fetching title:', error);
+        return null;
+    }
+}
+
 export async function POST(req: NextRequest) {
     if (!isAuthenticated(req)) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -27,10 +58,17 @@ export async function POST(req: NextRequest) {
 
     try {
         const body = await req.json();
-        const { link, note } = body;
+        const { link } = body;
+        let { note } = body;
 
         if (!link || typeof link !== 'string') {
             return NextResponse.json({ error: 'Invalid link' }, { status: 400 });
+        }
+
+        // If note is missing or empty, try to fetch the title
+        if (!note || typeof note !== 'string' || note.trim() === '') {
+            const fetchedTitle = await getTitle(link);
+            note = fetchedTitle || '';
         }
 
         const id = crypto.randomUUID();
@@ -38,7 +76,7 @@ export async function POST(req: NextRequest) {
         const stmt = db.prepare('INSERT INTO links (id, url, note, read, timestamp) VALUES (?, ?, ?, 0, ?)');
         stmt.run(id, link, note || '', timestamp);
 
-        return NextResponse.json({ message: 'Link saved', id }, { status: 201 });
+        return NextResponse.json({ message: 'Link saved', id, note }, { status: 201 });
     } catch (error) {
         console.error('Error saving link:', error);
         return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });

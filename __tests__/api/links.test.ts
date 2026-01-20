@@ -44,6 +44,78 @@ describe('Links API', () => {
             expect(json.id).toBeDefined();
         });
 
+        it('should fetch the title if note is missing', async () => {
+            const mockTitle = 'Example Title';
+            const mockHtml = `<html><head><title>${mockTitle}</title></head><body></body></html>`;
+            global.fetch = jest.fn().mockResolvedValue({
+                ok: true,
+                text: () => Promise.resolve(mockHtml),
+            });
+
+            const body = { link: 'https://test-title.com' };
+            const req = new NextRequest('http://localhost:3000/api/links', {
+                method: 'POST',
+                headers: {
+                    'authorization': AUTH_TOKEN,
+                    'content-type': 'application/json',
+                },
+                body: JSON.stringify(body),
+            });
+
+            const res = await POST(req);
+            const json = await res.json();
+
+            expect(res.status).toBe(201);
+            expect(json.note).toBe(mockTitle);
+        });
+
+        it('should decode HTML entities in the title', async () => {
+            const mockHtml = `<html><head><title>Title &amp; &quot;More&quot; &#039;Stuff&#039;</title></head></html>`;
+            global.fetch = jest.fn().mockResolvedValue({
+                ok: true,
+                text: () => Promise.resolve(mockHtml),
+            });
+
+            const body = { link: 'https://test-entities.com' };
+            const req = new NextRequest('http://localhost:3000/api/links', {
+                method: 'POST',
+                headers: {
+                    'authorization': AUTH_TOKEN,
+                    'content-type': 'application/json',
+                },
+                body: JSON.stringify(body),
+            });
+
+            const res = await POST(req);
+            const json = await res.json();
+
+            expect(json.note).toBe("Title & \"More\" 'Stuff'");
+        });
+
+        it('should fall back to empty string if fetching title fails', async () => {
+            // Suppress console.error for expected error
+            const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => { });
+            global.fetch = jest.fn().mockRejectedValue(new Error('Network error'));
+
+            const body = { link: 'https://fail-fetch.com' };
+            const req = new NextRequest('http://localhost:3000/api/links', {
+                method: 'POST',
+                headers: {
+                    'authorization': AUTH_TOKEN,
+                    'content-type': 'application/json',
+                },
+                body: JSON.stringify(body),
+            });
+
+            const res = await POST(req);
+            const json = await res.json();
+
+            expect(res.status).toBe(201);
+            expect(json.note).toBe('');
+
+            consoleSpy.mockRestore();
+        });
+
         it('should return 401 when unauthenticated', async () => {
             const body = { link: 'https://example.com' };
             const req = new NextRequest('http://localhost:3000/api/links', {
