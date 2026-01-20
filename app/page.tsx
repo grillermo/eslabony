@@ -1,3 +1,4 @@
+import Image from 'next/image';
 import { LinkList } from '@/components/link-list';
 import { Link } from '@/lib/types';
 
@@ -23,8 +24,15 @@ export default async function Home() {
 
   return (
     <main className="min-h-screen bg-gray-50 text-gray-900 font-sans p-4 safe-area-inset-bottom">
-      <header className="mb-6 pt-2">
-        <h1 className="text-2xl font-bold tracking-tight text-gray-900">Link Saver</h1>
+      <header className="mb-6 pt-2 flex justify-center">
+        <Image
+          src="/logo.png"
+          alt="Link Saver Logo"
+          width={180}
+          height={60}
+          priority
+          className="h-auto w-auto"
+        />
       </header>
 
       <LinkList links={links} />
