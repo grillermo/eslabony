@@ -6,13 +6,16 @@ import { useState } from 'react';
 
 const AUTH_TOKEN = '44p9Wq6iJRxp4DE2vp4b3Yw6KWhRjcNohjDetwwRNy4K7cyUcxdwuWTUxVZUJkhWVjU';
 
-export function LinkItem({ link }: { link: Link }) {
+export function LinkItem({ link, onMarkAsRead }: { link: Link, onMarkAsRead?: (id: string) => void }) {
     const router = useRouter();
     const [loading, setLoading] = useState(false);
 
     const markAsRead = async () => {
         if (loading || link.read) return;
         setLoading(true);
+        if (onMarkAsRead) {
+            onMarkAsRead(link.id);
+        }
 
         try {
             const res = await fetch('/api/links', {

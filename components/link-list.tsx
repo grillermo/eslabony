@@ -3,11 +3,22 @@
 import { Link } from '@/lib/types';
 import { LinkItem } from './link-item';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { useState, useEffect } from 'react';
 
-export function LinkList({ links }: { links: Link[] }) {
+export function LinkList({ links: initialLinks }: { links: Link[] }) {
     const router = useRouter();
+    const [links, setLinks] = useState(initialLinks);
     const searchParams = useSearchParams();
     const filter = searchParams.get('filter') || 'unread';
+
+    // Update local state when server props change
+    useEffect(() => {
+        setLinks(initialLinks);
+    }, [initialLinks]);
+
+    const handleMarkAsRead = (id: string) => {
+        setLinks(prev => prev.map(l => l.id === id ? { ...l, read: 1 } : l));
+    };
 
     const filteredLinks = links.filter(link => {
         if (filter === 'read') return link.read === 1;
@@ -32,8 +43,8 @@ export function LinkList({ links }: { links: Link[] }) {
                 <button
                     onClick={() => setFilter('unread')}
                     className={`flex-1 py-2 text-sm font-medium rounded-md transition-all ${filter === 'unread'
-                            ? 'bg-white text-gray-900 shadow-sm'
-                            : 'text-gray-500 hover:text-gray-700'
+                        ? 'bg-white text-gray-900 shadow-sm'
+                        : 'text-gray-500 hover:text-gray-700'
                         }`}
                 >
                     Unread
@@ -41,8 +52,8 @@ export function LinkList({ links }: { links: Link[] }) {
                 <button
                     onClick={() => setFilter('read')}
                     className={`flex-1 py-2 text-sm font-medium rounded-md transition-all ${filter === 'read'
-                            ? 'bg-white text-gray-900 shadow-sm'
-                            : 'text-gray-500 hover:text-gray-700'
+                        ? 'bg-white text-gray-900 shadow-sm'
+                        : 'text-gray-500 hover:text-gray-700'
                         }`}
                 >
                     Read
@@ -57,7 +68,7 @@ export function LinkList({ links }: { links: Link[] }) {
                     </div>
                 ) : (
                     filteredLinks.map(link => (
-                        <LinkItem key={link.id} link={link} />
+                        <LinkItem key={link.id} link={link} onMarkAsRead={handleMarkAsRead} />
                     ))
                 )}
             </div>
