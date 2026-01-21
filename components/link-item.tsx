@@ -50,7 +50,7 @@ export function LinkItem({ link, onMarkAsRead }: { link: Link, onMarkAsRead?: (i
         block p-4 mb-3 rounded-xl border transition-all active:scale-[0.98] cursor-pointer text-inherit no-underline hover:cursor-pointer
         ${link.read
                     ? 'bg-gray-100 border-gray-200 opacity-60'
-                    : 'bg-white border-gray-200 shadow-sm hover:shadow-md' // Active/Unread state
+                    : '' // Active/Unread state
                 }
         ${loading ? 'animate-pulse' : ''}
       `}

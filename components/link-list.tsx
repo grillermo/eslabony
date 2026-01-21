@@ -40,10 +40,10 @@ export function LinkList({ links: initialLinks }: { links: Link[] }) {
     };
 
     return (
-        <div className="w-full max-w-md mx-auto pb-20"> {/* Mobile container with padding for bottom safe area */}
+        <div className=""> {/* Mobile container with padding for bottom safe area */}
 
             {/* Tabs */}
-            <div className="flex p-1 bg-gray-100 rounded-lg mb-6 sticky top-2 z-10 shadow-sm backdrop-blur-sm bg-opacity-90">
+            <div className="flex p-1 bg-gray-100 rounded-lg mb-6 top-2 z-10 backdrop-blur-sm">
                 <button
                     onClick={() => setFilter('unread')}
                     className={`flex-1 py-2 text-sm font-medium rounded-md transition-all hover:cursor-pointer ${filter === 'unread'

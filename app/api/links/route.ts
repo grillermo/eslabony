@@ -10,7 +10,6 @@ function isAuthenticated(req: NextRequest) {
 }
 
 export async function GET(req: NextRequest) {
-    console.log(`[${new Date().toISOString()}] GET /api/links`);
     try {
         const stmt = db.prepare('SELECT * FROM links ORDER BY timestamp DESC');
         const links = stmt.all();
@@ -53,14 +52,12 @@ async function getTitle(url: string): Promise<string | null> {
 }
 
 export async function POST(req: NextRequest) {
-    console.log(`[${new Date().toISOString()}] POST /api/links`);
     if (!isAuthenticated(req)) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     try {
         const body = await req.json();
-        console.log(`[${new Date().toISOString()}] POST Payload:`, JSON.stringify(body, null, 2));
         const { link } = body;
         let { note } = body;
 
@@ -87,22 +84,6 @@ export async function POST(req: NextRequest) {
 }
 
 export async function PATCH(req: NextRequest) {
-    console.log(`[${new Date().toISOString()}] PATCH /api/links`);
-    // Assuming basic auth for patch as well, or maybe public if simpler? 
-    // User said "PATCH link: allows you to update the read property".
-    // I'll stick to requiring auth for consistency, but if the UI is client-side public, this might be an issue.
-    // Ideally, clicking a link to mark it as read should be seamless. 
-    // If this is a personal tool, maybe I check for a cookie or just allow it if the ID exists?
-    // Let's enforce auth for now as per "POST link: accepts an authentication token".
-    // Actually, for the UI to be seamless, the UI needs the token.
-
-    // Re-reading: "POST link: accepts an authentication token... GET links: ... when a link is clicked, it is marked as read... PATCH link: allows you to update the read property".
-    // It doesn't explicitly say PATCH needs auth, but POST does. 
-    // If I put auth on PATCH, the client needs the token. 
-    // For this demo, I'll relax auth on PATCH or assume the client has it. 
-    // Let's create a .env.local like setup for the client later?
-    // For now, I'll Require Auth. I will hardcode the token in the client for the demo.
-
     if (!isAuthenticated(req)) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
@@ -125,6 +106,33 @@ export async function PATCH(req: NextRequest) {
         return NextResponse.json({ message: 'Link updated' });
     } catch (error) {
         console.error('Error updating link:', error);
+        return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+    }
+}
+
+export async function DELETE(req: NextRequest) {
+    if (!isAuthenticated(req)) {
+        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    try {
+        const body = await req.json();
+        const { id } = body;
+
+        if (!id || typeof id !== 'string') {
+            return NextResponse.json({ error: 'Invalid payload' }, { status: 400 });
+        }
+
+        const stmt = db.prepare('DELETE FROM links WHERE id = ?');
+        const result = stmt.run(id);
+
+        if (result.changes === 0) {
+            return NextResponse.json({ error: 'Link not found' }, { status: 404 });
+        }
+
+        return NextResponse.json({ message: 'Link deleted' });
+    } catch (error) {
+        console.error('Error deleting link:', error);
         return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
     }
 }

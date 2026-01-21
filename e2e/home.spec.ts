@@ -6,11 +6,11 @@ test.describe('Home Page', () => {
         await page.goto('/');
 
         // Check title
-        await expect(page.locator('h1')).toHaveText('Link Saver');
+        await expect(page.getByAltText('Link Saver Logo')).toBeVisible();
 
         // Check Tabs
-        await expect(page.getByRole('button', { name: 'Unread', exact: true })).toBeVisible();
-        await expect(page.getByRole('button', { name: 'Read', exact: true })).toBeVisible();
+        await expect(page.getByRole('button', { name: /^Unread/ })).toBeVisible();
+        await expect(page.getByRole('button', { name: /^Read/ })).toBeVisible();
 
         // Verification of "No links found" or actual links depends on DB state
         // Since we are running against the persistent dev database, state is unpredictable unless we seed/clean.
@@ -20,7 +20,7 @@ test.describe('Home Page', () => {
         const newLinkUrl = `https://test-link-${Date.now()}.com`;
 
         // Create a link via API request attached to the page context
-        await page.request.post('/api/links', {
+        const response = await page.request.post('/api/links', {
             headers: {
                 'Authorization': '44p9Wq6iJRxp4DE2vp4b3Yw6KWhRjcNohjDetwwRNy4K7cyUcxdwuWTUxVZUJkhWVjU'
             },
@@ -29,6 +29,7 @@ test.describe('Home Page', () => {
                 note: 'Playwright Test Link'
             }
         });
+        const { id: newLinkId } = await response.json();
 
         await page.reload();
 
@@ -37,14 +38,14 @@ test.describe('Home Page', () => {
         await expect(page.getByText('Playwright Test Link')).toBeVisible();
 
         // Switch to Read tab
-        await page.getByRole('button', { name: 'Read', exact: true }).click();
+        await page.getByRole('button', { name: /^Read/ }).click();
         await expect(page).toHaveURL(/filter=read/);
 
         // Should NOT see the new link in Read tab yet
         await expect(page.getByText(newLinkUrl)).not.toBeVisible();
 
         // Go back to Unread
-        await page.getByRole('button', { name: 'Unread', exact: true }).click();
+        await page.getByRole('button', { name: /^Unread/ }).click();
         await expect(page).not.toHaveURL(/filter=read/);
 
         // Click the item to mark as read
@@ -57,9 +58,19 @@ test.describe('Home Page', () => {
         await expect(page.getByText(newLinkUrl)).not.toBeVisible();
 
         // Go to Read tab
-        await page.getByRole('button', { name: 'Read', exact: true }).click();
+        await page.getByRole('button', { name: /^Read/ }).click();
 
         // Should be present in Read tab
         await expect(page.getByText(newLinkUrl)).toBeVisible();
+
+        // Clean up the created link
+        await page.request.delete(`/api/links`, {
+            headers: {
+                'Authorization': '44p9Wq6iJRxp4DE2vp4b3Yw6KWhRjcNohjDetwwRNy4K7cyUcxdwuWTUxVZUJkhWVjU'
+            },
+            data: {
+                id: newLinkId
+            }
+        });
     });
 });
