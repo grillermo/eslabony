@@ -47,9 +47,9 @@ export function LinkItem({ link, onMarkAsRead }: { link: Link, onMarkAsRead?: (i
             rel="noopener noreferrer"
             onClick={markAsRead}
             className={`
-        block p-4 mb-3 rounded-xl border transition-all active:scale-[0.98] cursor-pointer text-inherit no-underline hover:cursor-pointer
+        block p-4 mb-3 rounded-xl border border-blue-200 transition-all active:scale-[0.98] cursor-pointer text-inherit no-underline hover:cursor-pointer
         ${link.read
-                    ? 'bg-gray-100 border-gray-200 opacity-60'
+                    ? 'bg-gray-100 opacity-60'
                     : '' // Active/Unread state
                 }
         ${loading ? 'animate-pulse' : ''}
