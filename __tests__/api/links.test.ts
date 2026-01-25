@@ -22,7 +22,7 @@ jest.mock('@/lib/db', () => {
 
 describe('Links API', () => {
     // Auth token is set in jest.setup.js
-    const AUTH_TOKEN = process.env.AUTH_TOKEN || '';
+    const AUTH_TOKEN = process.env.NEXT_PUBLIC_AUTH_TOKEN || '';
 
     describe('POST /api/links', () => {
         it('should create a link when authenticated', async () => {

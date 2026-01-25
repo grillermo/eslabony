@@ -4,7 +4,7 @@ import { Link } from '@/lib/types';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 
-const AUTH_TOKEN = '44p9Wq6iJRxp4DE2vp4b3Yw6KWhRjcNohjDetwwRNy4K7cyUcxdwuWTUxVZUJkhWVjU';
+const AUTH_TOKEN = process.env.NEXT_PUBLIC_AUTH_TOKEN || '';
 
 export function LinkItem({ link, onMarkAsRead }: { link: Link, onMarkAsRead?: (id: string) => void }) {
     const router = useRouter();
